@@ -22,9 +22,181 @@
     <link rel="apple-touch-icon-precomposed" sizes="114x114" href="images/ico/apple-touch-icon-114-precomposed.png">
     <link rel="apple-touch-icon-precomposed" sizes="72x72" href="images/ico/apple-touch-icon-72-precomposed.png">
     <link rel="apple-touch-icon-precomposed" href="images/ico/apple-touch-icon-57-precomposed.png">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+	<style>
+		* {
+	box-sizing: border-box;
+  }
+  
+  /* Create two equal columns that floats next to each other */
+  .column {
+	/* float: left; */
+	width: 100%;
+	/* padding: 10px; */
+  }
+  
+  /* Clear floats after the columns */
+  .row:after {
+	content: "";
+	display: table;
+	clear: both;
+  }
+		.btn {
+		  background-color: inherit;
+		  padding: 14px 28px;
+		  font-size: 16px;
+		  cursor: pointer;
+		  display: inline-block;
+		  height:50px;
+		  text-align: center;
+  
+		}
+		/* Orange */
+		.add {
+		  background-color: white;
+		  color: orange;
+		  border: 2px solid orange;
+		  
+		}
+  
+		.add:hover {
+		  background: #ff9800;
+		  color: white;
+		}
+		form.example input[type=text] {
+	padding: 10px;
+	font-size: 17px;
+	border: 1px solid grey;
+	float: left;
+	width: 80%;
+	background: #f1f1f1;
+  }
+  
+  form.example button {
+	float: left;
+	width: 20%;
+	padding: 10px;
+	background: #ff9800;
+	color: white;
+	font-size: 17px;
+	border: 1px solid grey;
+	border-left: none;
+	cursor: pointer;
+  }
+  
+  form.example button:hover {
+	background: #ff9800;
+  }
+  
+  form.example::after {
+	content: "";
+	clear: both;
+	display: table;
+  }
+  
+	  </style>
 </head><!--/head-->
 
-<body>
+<body onload="getAllListApiCall()">
+    <script src="https://www.gstatic.com/firebasejs/8.1.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.1.1/firebase-database.js"></script>
+     <script>
+      // Your web app's Firebase configuration
+      const firebaseConfig = {
+    apiKey: "AIzaSyB-dyis0X_gDRt4xRVAIWnwVjJllICmIUQ",
+    authDomain: "eshopper-7c809.firebaseapp.com",
+    databaseURL: "https://eshopper-7c809-default-rtdb.firebaseio.com",
+    projectId: "eshopper-7c809",
+    storageBucket: "eshopper-7c809.appspot.com",
+    messagingSenderId: "883937275197",
+    appId: "1:883937275197:web:d8aa26d07dc6546109a954",
+    measurementId: "G-61T4Z8D6JJ"
+  };
+      // Initialize Firebase
+      firebase.initializeApp(firebaseConfig);
+
+      function getAllListApiCall(){
+        firebase
+        .database()
+        .ref("eshopper").on("value", (sanpshot) => {
+          var str = JSON.stringify(sanpshot.val())
+          var json = JSON.parse(str)
+          var jsonArray = []
+          for (var key in json) {
+            if (json.hasOwnProperty(key)) {
+                var value = json[key];
+                if (value != null && value != undefined) {
+                  jsonArray.push(value)
+                }
+            }
+        }
+          console.log("response from backend",jsonArray)
+          updateUiForResponseList(jsonArray)
+        });
+      }
+      function searchApiCall(){
+        
+        var searchText = document.getElementById("search").value;
+        firebase
+        .database()
+        .ref("eshopper").orderByChild('name').startAt(searchText).endAt(searchText + 'b\uf8ff').on("value", (sanpshot) => {
+          var str = JSON.stringify(sanpshot.val())
+          var json = JSON.parse(str)
+          var jsonArray = []
+          for (var key in json) {
+            if (json.hasOwnProperty(key)) {
+                var value = json[key];
+                if (value != null && value != undefined) {
+                  jsonArray.push(value)
+                }
+            }
+        }
+          console.log("search response from backend",jsonArray)
+          updateUiForResponseList(jsonArray)
+        });
+      }
+     
+      function updateUiForResponseList(jsonArray){
+        var list = document.getElementById("myList");
+          while (list.hasChildNodes()) {
+            list.removeChild(list.firstChild);
+          }
+          for (var i =0;i<jsonArray.length;i++) {
+            var item = jsonArray[i];
+         
+          var daString=`<div>
+          <div class="col-sm-4">
+							<div class="product-image-wrapper">
+								<div class="single-products">
+										<div class="productinfo text-center">
+											<img height="250" src="`+ item["img"] +`" alt="" />
+											<h2>₹ `+ item["price"] +`</h2>
+											<p>`+ item["name"] +`</p>
+											<a href="#" class="btn btn-default add-to-cart"><i class="fa fa-shopping-cart"></i>Add to cart</a>
+										</div>
+								</div>
+								<div class="choose">
+									<ul class="nav nav-pills nav-justified">
+										<li><a href="#"><i class="fa fa-plus-square"></i>Add to wishlist</a></li>
+										<li><a href="#"><i class="fa fa-plus-square"></i>Add to compare</a></li>
+									</ul>
+								</div>
+							</div>
+						</div>
+					</div>
+        `;
+
+
+       
+          var newNode = document.createElement('div');
+                newNode.className = 'column';
+                newNode.innerHTML = daString;
+                    list.appendChild(newNode);
+          }
+         
+      }
+    </script>
 	<header id="header"><!--header-->
 		
 		
@@ -129,48 +301,25 @@
 					<div class="left-sidebar">
 						<h2>Category</h2>
 						<div class="panel-group category-products" id="accordian"><!--category-productsr-->
-							<div class="panel panel-default">
-								<div class="panel-heading">
-									<h4 class="panel-title">
-										<a data-toggle="collapse" data-parent="#accordian" href="#sportswear">
-											<span class="badge pull-right"><i class="fa fa-plus"></i></span>
-											Sportswear
-										</a>
-									</h4>
-								</div>
-								<div id="sportswear" class="panel-collapse collapse">
-									<div class="panel-body">
-										<ul>
-											<li><a href="#">Nike </a></li>
-											<li><a href="#">Under Armour </a></li>
-											<li><a href="#">Adidas </a></li>
-											<li><a href="#">Puma</a></li>
-											<li><a href="#">ASICS </a></li>
-										</ul>
-									</div>
-								</div>
-							</div>
+							
 							<div class="panel panel-default">
 								<div class="panel-heading">
 									<h4 class="panel-title">
 										<a data-toggle="collapse" data-parent="#accordian" href="#mens">
 											<span class="badge pull-right"><i class="fa fa-plus"></i></span>
-											Mens
+											Boys
 										</a>
 									</h4>
 								</div>
 								<div id="mens" class="panel-collapse collapse">
 									<div class="panel-body">
 										<ul>
-											<li><a href="#">Fendi</a></li>
-											<li><a href="#">Guess</a></li>
-											<li><a href="#">Valentino</a></li>
-											<li><a href="#">Dior</a></li>
-											<li><a href="#">Versace</a></li>
+											<li><a href="#">Allen Solly</a></li>
+											<li><a href="#">Puma</a></li>
+											<li><a href="#">Jockey</a></li>
+											<li><a href="#">U.S. POLO ASSN.</a></li>
+											<li><a href="#">BODYCARE</a></li>
 											<li><a href="#">Armani</a></li>
-											<li><a href="#">Prada</a></li>
-											<li><a href="#">Dolce and Gabbana</a></li>
-											<li><a href="#">Chanel</a></li>
 											<li><a href="#">Gucci</a></li>
 										</ul>
 									</div>
@@ -182,20 +331,26 @@
 									<h4 class="panel-title">
 										<a data-toggle="collapse" data-parent="#accordian" href="#womens">
 											<span class="badge pull-right"><i class="fa fa-plus"></i></span>
-											Womens
+											Girls
 										</a>
 									</h4>
 								</div>
 								<div id="womens" class="panel-collapse collapse">
 									<div class="panel-body">
 										<ul>
-											<li><a href="#">Fendi</a></li>
-											<li><a href="#">Guess</a></li>
-											<li><a href="#">Valentino</a></li>
-											<li><a href="#">Dior</a></li>
-											<li><a href="#">Versace</a></li>
+											<li><a href="#">BIBA</a></li>
+											<li><a href="#">Berrylush</a></li>
+											<li><a href="#">Aurelia</a></li>
+											<li><a href="#">Levi’s</a></li>
+											<li><a href="#">Allen Solly</a></li>
+											<li><a href="#">Gucci</a></li>
 										</ul>
 									</div>
+								</div>
+							</div>
+							<div class="panel panel-default">
+								<div class="panel-heading">
+									<h4 class="panel-title"><a href="#">Nightwear</a></h4>
 								</div>
 							</div>
 							<div class="panel panel-default">
@@ -205,32 +360,12 @@
 							</div>
 							<div class="panel panel-default">
 								<div class="panel-heading">
-									<h4 class="panel-title"><a href="#">Fashion</a></h4>
-								</div>
-							</div>
-							<div class="panel panel-default">
-								<div class="panel-heading">
-									<h4 class="panel-title"><a href="#">Households</a></h4>
-								</div>
-							</div>
-							<div class="panel panel-default">
-								<div class="panel-heading">
-									<h4 class="panel-title"><a href="#">Interiors</a></h4>
-								</div>
-							</div>
-							<div class="panel panel-default">
-								<div class="panel-heading">
-									<h4 class="panel-title"><a href="#">Clothing</a></h4>
-								</div>
-							</div>
-							<div class="panel panel-default">
-								<div class="panel-heading">
-									<h4 class="panel-title"><a href="#">Bags</a></h4>
-								</div>
-							</div>
-							<div class="panel panel-default">
-								<div class="panel-heading">
 									<h4 class="panel-title"><a href="#">Shoes</a></h4>
+								</div>
+							</div>
+							<div class="panel panel-default">
+								<div class="panel-heading">
+									<h4 class="panel-title"><a href="#">Fashion</a></h4>
 								</div>
 							</div>
 						</div><!--/category-products-->
@@ -239,13 +374,13 @@
 							<h2>Brands</h2>
 							<div class="brands-name">
 								<ul class="nav nav-pills nav-stacked">
-									<li><a href="#"> <span class="pull-right">(50)</span>Acne</a></li>
-									<li><a href="#"> <span class="pull-right">(56)</span>Grüne Erde</a></li>
-									<li><a href="#"> <span class="pull-right">(27)</span>Albiro</a></li>
-									<li><a href="#"> <span class="pull-right">(32)</span>Ronhill</a></li>
-									<li><a href="#"> <span class="pull-right">(5)</span>Oddmolly</a></li>
-									<li><a href="#"> <span class="pull-right">(9)</span>Boudestijn</a></li>
-									<li><a href="#"> <span class="pull-right">(4)</span>Rösch creative culture</a></li>
+									<li><a href="#"> <span class="pull-right">(32)</span>BIBA</a></li>
+									<li><a href="#"> <span class="pull-right">(26)</span>Aurelia</a></li>
+									<li><a href="#"> <span class="pull-right">(17)</span>Allen Solly</a></li>
+									<li><a href="#"> <span class="pull-right">(28)</span>Gucci</a></li>
+									<li><a href="#"> <span class="pull-right">(5)</span>Levi’s</a></li>
+									<li><a href="#"> <span class="pull-right">(9)</span>Jockey</a></li>
+									<li><a href="#"> <span class="pull-right">(14)</span>U.S. POLO ASSN.</a></li>
 								</ul>
 							</div>
 						</div><!--/brands_products-->
@@ -268,7 +403,8 @@
 				<div class="col-sm-9 padding-right">
 					<div class="features_items"><!--features_items-->
 						<h2 class="title text-center">Features Items</h2>
-						<div class="col-sm-4">
+						
+						<!-- <div class="col-sm-4">
 							<div class="product-image-wrapper">
 								<div class="single-products">
 										<div class="productinfo text-center">
@@ -431,10 +567,18 @@
 									</ul>
 								</div>
 							</div>
-						</div>
+						
+						
+						
+						</div> -->
 						
 					</div><!--features_items-->
-					
+					<form class="example" action="javascript:void(0);" onsubmit="searchApiCall()">
+						<input type="text" placeholder="Search.." name="search" id="search" >
+						<button ><i class="fa fa-search" ></i></button>
+					  </form>
+					  <div class="row" id="myList" style="margin-top:10px">
+					  </div>
 					<div class="category-tab"><!--category-tab-->
 						<div class="col-sm-12" >
 							<ul class="nav nav-tabs">
